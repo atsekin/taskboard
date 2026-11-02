@@ -15,3 +15,4 @@ A Kanban board built with React 19, TypeScript, and Vite. No backend; data is st
 - Use only functional components; no `any` types allowed.
 - Styles must be implemented using Tailwind CSS only.
 - New dependencies may only be added after approval from me.
+- TypeScript is pinned to ~6.0 for compatibility with typescript-eslint; do not update to 7.
