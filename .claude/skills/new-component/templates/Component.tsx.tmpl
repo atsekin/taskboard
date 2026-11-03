@@ -1,0 +1,22 @@
+import type { ReactNode } from 'react';
+
+export type {{Name}}Props = {
+  /** Component content */
+  children?: ReactNode;
+  /** Additional Tailwind classes from the outside */
+  className?: string;
+};
+
+/**
+ * {{Description}}
+ */
+export function {{Name}}({ children, className = '' }: {{Name}}Props) {
+  return (
+    <div
+      data-testid="{{kebab-name}}"
+      className={`{{base-classes}} ${className}`.trim()}
+    >
+      {children}
+    </div>
+  );
+}
