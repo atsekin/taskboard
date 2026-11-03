@@ -38,8 +38,8 @@ function Column({ columnId, title }: ColumnProps) {
       <Modal isOpen={isAddOpen} onClose={() => setIsAddOpen(false)}>
         <CardForm
           submitLabel="Add"
-          onSubmit={(cardTitle, description) => {
-            addCard(columnId, cardTitle, description)
+          onSubmit={(cardTitle, description, tags) => {
+            addCard(columnId, cardTitle, description, tags)
             setIsAddOpen(false)
           }}
           onCancel={() => setIsAddOpen(false)}
