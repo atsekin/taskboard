@@ -3,6 +3,7 @@ import type { Card } from '../../store/boardStore'
 import { COLUMN_IDS, useBoardStore } from '../../store/boardStore'
 import CardForm from '../CardForm/CardForm'
 import Modal from '../Modal/Modal'
+import { TagList } from '../TagList/TagList'
 
 interface CardItemProps {
   card: Card
@@ -23,6 +24,7 @@ function CardItem({ card }: CardItemProps) {
       {card.description && (
         <p className="mt-1 text-sm text-slate-500">{card.description}</p>
       )}
+      <TagList tags={card.tags} className="mt-2" />
       <div className="mt-2 flex items-center gap-1">
         <button
           type="button"
@@ -63,8 +65,9 @@ function CardItem({ card }: CardItemProps) {
           submitLabel="Save"
           initialTitle={card.title}
           initialDescription={card.description}
-          onSubmit={(title, description) => {
-            updateCard(card.id, title, description)
+          initialTags={card.tags}
+          onSubmit={(title, description, tags) => {
+            updateCard(card.id, title, description, tags)
             setIsEditOpen(false)
           }}
           onCancel={() => setIsEditOpen(false)}

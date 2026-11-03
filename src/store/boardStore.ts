@@ -11,29 +11,49 @@ export const COLUMN_TITLES: Record<ColumnId, string> = {
   done: 'Done',
 }
 
+export const TAG_TITLES = [
+  'Bug',
+  'Feature',
+  'Improvement',
+  'Research',
+  'Frontend',
+  'Backend',
+  'Design',
+  'Documentation',
+] as const
+
+export type TagTitle = (typeof TAG_TITLES)[number]
+
+export interface Tag {
+  id: string
+  title: TagTitle
+}
+
 export interface Card {
   id: string
   title: string
   description: string
   columnId: ColumnId
   createdAt: number
+  tags: Tag[]
 }
 
 interface BoardState {
   cards: Card[]
-  addCard: (columnId: ColumnId, title: string, description?: string) => void
-  updateCard: (id: string, title: string, description: string) => void
+  addCard: (columnId: ColumnId, title: string, description?: string, tags?: Tag[]) => void
+  updateCard: (id: string, title: string, description: string, tags: Tag[]) => void
   deleteCard: (id: string) => void
   moveCard: (id: string, direction: 'left' | 'right') => void
 }
 
 const MAX_TITLE_LENGTH = 100
+const STORE_VERSION = 1
 
 export const useBoardStore = create<BoardState>()(
   persist(
     (set, get) => ({
       cards: [],
-      addCard: (columnId, title, description = '') => {
+      addCard: (columnId, title, description = '', tags = []) => {
         const trimmedTitle = title.trim().slice(0, MAX_TITLE_LENGTH)
         if (!trimmedTitle) return
         const newCard: Card = {
@@ -42,16 +62,17 @@ export const useBoardStore = create<BoardState>()(
           description: description.trim(),
           columnId,
           createdAt: Date.now(),
+          tags,
         }
         set({ cards: [...get().cards, newCard] })
       },
-      updateCard: (id, title, description) => {
+      updateCard: (id, title, description, tags) => {
         const trimmedTitle = title.trim().slice(0, MAX_TITLE_LENGTH)
         if (!trimmedTitle) return
         set({
           cards: get().cards.map((card) =>
             card.id === id
-              ? { ...card, title: trimmedTitle, description: description.trim() }
+              ? { ...card, title: trimmedTitle, description: description.trim(), tags }
               : card,
           ),
         })
@@ -73,7 +94,18 @@ export const useBoardStore = create<BoardState>()(
     }),
     {
       name: 'taskboard-storage',
+      version: STORE_VERSION,
       partialize: (state) => ({ cards: state.cards }),
+      migrate: (persistedState, version) => {
+        const state = persistedState as { cards: Array<Card & { tags?: Tag[] }> }
+        if (version < 1) {
+          return {
+            ...state,
+            cards: state.cards.map((card) => ({ ...card, tags: card.tags ?? [] })),
+          }
+        }
+        return state as { cards: Card[] }
+      },
     },
   ),
 )

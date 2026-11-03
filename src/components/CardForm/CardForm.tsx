@@ -1,10 +1,13 @@
 import { useState } from 'react'
+import type { Tag } from '../../store/boardStore'
+import { TagPicker } from '../TagPicker/TagPicker'
 
 interface CardFormProps {
   initialTitle?: string
   initialDescription?: string
+  initialTags?: Tag[]
   submitLabel: string
-  onSubmit: (title: string, description: string) => void
+  onSubmit: (title: string, description: string, tags: Tag[]) => void
   onCancel: () => void
 }
 
@@ -13,12 +16,14 @@ const MAX_TITLE_LENGTH = 100
 function CardForm({
   initialTitle = '',
   initialDescription = '',
+  initialTags = [],
   submitLabel,
   onSubmit,
   onCancel,
 }: CardFormProps) {
   const [title, setTitle] = useState(initialTitle)
   const [description, setDescription] = useState(initialDescription)
+  const [tags, setTags] = useState<Tag[]>(initialTags)
 
   const trimmedTitle = title.trim()
   const isValid = trimmedTitle.length > 0 && trimmedTitle.length <= MAX_TITLE_LENGTH
@@ -28,7 +33,7 @@ function CardForm({
       className="flex flex-col gap-2"
       onSubmit={(event) => {
         event.preventDefault()
-        if (isValid) onSubmit(title, description)
+        if (isValid) onSubmit(title, description, tags)
       }}
     >
       <input
@@ -49,6 +54,7 @@ function CardForm({
         rows={3}
         className="rounded border border-slate-300 px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400"
       />
+      <TagPicker selected={tags} onChange={setTags} />
       <div className="mt-2 flex justify-end gap-2">
         <button
           type="button"

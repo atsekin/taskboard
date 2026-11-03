@@ -56,6 +56,17 @@ describe('addCard', () => {
     expect(cards[0].title).toBe('First')
     expect(cards[1].title).toBe('Second')
   })
+
+  it('defaults tags to an empty array when omitted', () => {
+    useBoardStore.getState().addCard('todo', 'Write report')
+    expect(useBoardStore.getState().cards[0].tags).toEqual([])
+  })
+
+  it('stores provided tags on the new card', () => {
+    const tags = [{ id: 't1', title: 'Bug' as const }]
+    useBoardStore.getState().addCard('todo', 'Write report', '', tags)
+    expect(useBoardStore.getState().cards[0].tags).toEqual(tags)
+  })
 })
 
 describe('updateCard', () => {
@@ -63,7 +74,7 @@ describe('updateCard', () => {
     useBoardStore.getState().addCard('todo', 'First')
     useBoardStore.getState().addCard('todo', 'Second')
     const [first, second] = useBoardStore.getState().cards
-    useBoardStore.getState().updateCard(first.id, 'Updated', 'New description')
+    useBoardStore.getState().updateCard(first.id, 'Updated', 'New description', [])
 
     const cards = useBoardStore.getState().cards
     expect(cards.find((c) => c.id === first.id)).toMatchObject({
@@ -79,14 +90,14 @@ describe('updateCard', () => {
   it('is a no-op when id does not exist', () => {
     useBoardStore.getState().addCard('todo', 'First')
     const before = useBoardStore.getState().cards
-    useBoardStore.getState().updateCard('nonexistent-id', 'Updated', 'desc')
+    useBoardStore.getState().updateCard('nonexistent-id', 'Updated', 'desc', [])
     expect(useBoardStore.getState().cards).toEqual(before)
   })
 
   it('is a no-op when the new title is empty or whitespace-only', () => {
     useBoardStore.getState().addCard('todo', 'First')
     const [card] = useBoardStore.getState().cards
-    useBoardStore.getState().updateCard(card.id, '   ', 'desc')
+    useBoardStore.getState().updateCard(card.id, '   ', 'desc', [])
     expect(useBoardStore.getState().cards[0].title).toBe('First')
     expect(useBoardStore.getState().cards[0].description).toBe('')
   })
@@ -95,8 +106,30 @@ describe('updateCard', () => {
     useBoardStore.getState().addCard('todo', 'First')
     const [card] = useBoardStore.getState().cards
     const longTitle = 'b'.repeat(150)
-    useBoardStore.getState().updateCard(card.id, longTitle, '')
+    useBoardStore.getState().updateCard(card.id, longTitle, '', [])
     expect(useBoardStore.getState().cards[0].title).toHaveLength(100)
+  })
+
+  it("replaces the matching card's tags", () => {
+    useBoardStore.getState().addCard('todo', 'First', '', [{ id: 't1', title: 'Bug' as const }])
+    const [card] = useBoardStore.getState().cards
+    const newTags = [{ id: 't2', title: 'Feature' as const }]
+    useBoardStore.getState().updateCard(card.id, card.title, card.description, newTags)
+    expect(useBoardStore.getState().cards[0].tags).toEqual(newTags)
+  })
+
+  it('clears tags when given an empty array', () => {
+    useBoardStore.getState().addCard('todo', 'First', '', [{ id: 't1', title: 'Bug' as const }])
+    const [card] = useBoardStore.getState().cards
+    useBoardStore.getState().updateCard(card.id, card.title, card.description, [])
+    expect(useBoardStore.getState().cards[0].tags).toEqual([])
+  })
+
+  it('leaves tags untouched when the no-op-empty-title guard fires', () => {
+    useBoardStore.getState().addCard('todo', 'First', '', [{ id: 't1', title: 'Bug' as const }])
+    const [card] = useBoardStore.getState().cards
+    useBoardStore.getState().updateCard(card.id, '   ', 'desc', [])
+    expect(useBoardStore.getState().cards[0].tags).toEqual([{ id: 't1', title: 'Bug' }])
   })
 })
 
@@ -168,5 +201,21 @@ describe('persistence', () => {
     const parsed = JSON.parse(raw as string)
     expect(parsed.state.cards).toHaveLength(1)
     expect(parsed.state.cards[0].title).toBe('Persisted task')
+  })
+})
+
+describe('tags persistence migration', () => {
+  it('backfills tags: [] on cards from a pre-tags localStorage record', async () => {
+    const legacyState = {
+      state: {
+        cards: [
+          { id: 'old-1', title: 'Legacy card', description: '', columnId: 'todo', createdAt: 1 },
+        ],
+      },
+      version: 0,
+    }
+    localStorage.setItem('taskboard-storage', JSON.stringify(legacyState))
+    await useBoardStore.persist.rehydrate()
+    expect(useBoardStore.getState().cards[0].tags).toEqual([])
   })
 })
