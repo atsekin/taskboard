@@ -1,4 +1,4 @@
-import { TAG_TITLES, type Tag } from '../../store/boardStore'
+import { DEFAULT_GROUP, TAG_TITLES, type Tag } from '../../store/boardStore'
 
 export type TagPickerProps = {
   selected: Tag[]
@@ -12,7 +12,7 @@ export function TagPicker({ selected, onChange, className = '' }: TagPickerProps
     if (existing) {
       onChange(selected.filter((tag) => tag.id !== existing.id))
     } else {
-      onChange([...selected, { id: crypto.randomUUID(), title }])
+      onChange([...selected, { id: crypto.randomUUID(), title, group: DEFAULT_GROUP }])
     }
   }
 

@@ -63,8 +63,53 @@ describe('CardForm', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Bug' }))
     await userEvent.click(screen.getByRole('button', { name: 'Add' }))
     expect(onSubmit).toHaveBeenCalledWith('Write report', '', [
-      { id: expect.any(String), title: 'Bug' },
+      { id: expect.any(String), title: 'Bug', group: 'default' },
     ])
+  })
+
+  it('includes the selected priority alongside regular tags in onSubmit', async () => {
+    const onSubmit = vi.fn()
+    render(<CardForm submitLabel="Add" onSubmit={onSubmit} onCancel={vi.fn()} />)
+    await userEvent.type(screen.getByPlaceholderText('Title'), 'Write report')
+    await userEvent.click(screen.getByRole('button', { name: 'Bug' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Critical' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Add' }))
+    expect(onSubmit).toHaveBeenCalledWith('Write report', '', [
+      { id: expect.any(String), title: 'Bug', group: 'default' },
+      { id: expect.any(String), title: 'Critical', group: 'priority' },
+    ])
+  })
+
+  it('separates a pre-filled priority tag from the regular TagPicker selection', () => {
+    render(
+      <CardForm
+        submitLabel="Save"
+        initialTags={[
+          { id: '1', title: 'Bug', group: 'default' },
+          { id: '2', title: 'High', group: 'priority' },
+        ]}
+        onSubmit={vi.fn()}
+        onCancel={vi.fn()}
+      />,
+    )
+    expect(screen.getByRole('button', { name: 'Bug' })).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByRole('button', { name: 'High' })).toHaveAttribute('aria-pressed', 'true')
+  })
+
+  it('omits priority from onSubmit after it is cleared', async () => {
+    const onSubmit = vi.fn()
+    render(
+      <CardForm
+        submitLabel="Save"
+        initialTitle="Write report"
+        initialTags={[{ id: '2', title: 'High', group: 'priority' }]}
+        onSubmit={onSubmit}
+        onCancel={vi.fn()}
+      />,
+    )
+    await userEvent.click(screen.getByRole('button', { name: 'High' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Save' }))
+    expect(onSubmit).toHaveBeenCalledWith('Write report', '', [])
   })
 
   it('calls onCancel when Cancel is clicked', async () => {

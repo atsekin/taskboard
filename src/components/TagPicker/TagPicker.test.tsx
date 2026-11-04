@@ -19,7 +19,9 @@ describe('TagPicker', () => {
     const onChange = vi.fn()
     render(<TagPicker selected={[]} onChange={onChange} />)
     await userEvent.click(screen.getByRole('button', { name: 'Bug' }))
-    expect(onChange).toHaveBeenCalledWith([{ id: expect.any(String), title: 'Bug' }])
+    expect(onChange).toHaveBeenCalledWith([
+      { id: expect.any(String), title: 'Bug', group: 'default' },
+    ])
   })
 
   it('removes a tag when an already-selected option is clicked', async () => {
@@ -35,6 +37,8 @@ describe('TagPicker', () => {
     await userEvent.tab()
     expect(screen.getByRole('button', { name: 'Bug' })).toHaveFocus()
     await userEvent.keyboard('{Enter}')
-    expect(onChange).toHaveBeenCalledWith([{ id: expect.any(String), title: 'Bug' }])
+    expect(onChange).toHaveBeenCalledWith([
+      { id: expect.any(String), title: 'Bug', group: 'default' },
+    ])
   })
 })

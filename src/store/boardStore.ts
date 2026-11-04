@@ -24,9 +24,36 @@ export const TAG_TITLES = [
 
 export type TagTitle = (typeof TAG_TITLES)[number]
 
+export const DEFAULT_GROUP = 'default'
+export const PRIORITY_GROUP = 'priority'
+
+export type TagGroup = typeof DEFAULT_GROUP | typeof PRIORITY_GROUP
+
+export const PRIORITY_TITLES = ['Critical', 'High', 'Medium', 'Low'] as const
+
+export type PriorityTitle = (typeof PRIORITY_TITLES)[number]
+
 export interface Tag {
   id: string
-  title: TagTitle
+  title: TagTitle | PriorityTitle
+  group?: TagGroup
+}
+
+export function dedupeTagsByGroup(tags: Tag[]): Tag[] {
+  const result: Tag[] = []
+  const groupIndex = new Map<string, number>()
+  for (const tag of tags) {
+    if (tag.group && tag.group !== DEFAULT_GROUP) {
+      const existingIndex = groupIndex.get(tag.group)
+      if (existingIndex !== undefined) {
+        result[existingIndex] = tag
+        continue
+      }
+      groupIndex.set(tag.group, result.length)
+    }
+    result.push(tag)
+  }
+  return result
 }
 
 export interface Card {
@@ -62,7 +89,7 @@ export const useBoardStore = create<BoardState>()(
           description: description.trim(),
           columnId,
           createdAt: Date.now(),
-          tags,
+          tags: dedupeTagsByGroup(tags),
         }
         set({ cards: [...get().cards, newCard] })
       },
@@ -72,7 +99,12 @@ export const useBoardStore = create<BoardState>()(
         set({
           cards: get().cards.map((card) =>
             card.id === id
-              ? { ...card, title: trimmedTitle, description: description.trim(), tags }
+              ? {
+                  ...card,
+                  title: trimmedTitle,
+                  description: description.trim(),
+                  tags: dedupeTagsByGroup(tags),
+                }
               : card,
           ),
         })
