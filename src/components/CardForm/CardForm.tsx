@@ -1,5 +1,6 @@
 import { useState, type ChangeEvent, type FormEvent } from 'react'
-import type { Tag } from '../../store/boardStore'
+import { PRIORITY_GROUP, type Tag } from '../../store/boardStore'
+import { PriorityPicker } from '../PriorityPicker'
 import { TagPicker } from '../TagPicker'
 
 export type CardFormProps = {
@@ -25,7 +26,12 @@ export function CardForm({
 }: CardFormProps) {
   const [title, setTitle] = useState(initialTitle)
   const [description, setDescription] = useState(initialDescription)
-  const [tags, setTags] = useState<Tag[]>(initialTags)
+  const [tags, setTags] = useState<Tag[]>(
+    initialTags.filter((tag) => tag.group !== PRIORITY_GROUP),
+  )
+  const [priority, setPriority] = useState<Tag | null>(
+    initialTags.find((tag) => tag.group === PRIORITY_GROUP) ?? null,
+  )
 
   const trimmedTitle = title.trim()
   const isValid = trimmedTitle.length > 0 && trimmedTitle.length <= MAX_TITLE_LENGTH
@@ -40,7 +46,7 @@ export function CardForm({
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    if (isValid) onSubmit(title, description, tags)
+    if (isValid) onSubmit(title, description, priority ? [...tags, priority] : tags)
   }
 
   return (
@@ -63,7 +69,10 @@ export function CardForm({
         rows={3}
         className="rounded border border-slate-300 px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400"
       />
+      <p className="text-xs font-medium text-slate-500">Tags</p>
       <TagPicker selected={tags} onChange={setTags} />
+      <p className="text-xs font-medium text-slate-500">Priority</p>
+      <PriorityPicker selected={priority} onChange={setPriority} />
       <div className="mt-2 flex justify-end gap-2">
         <button
           type="button"

@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import { useBoardStore } from './boardStore'
+import { dedupeTagsByGroup, useBoardStore } from './boardStore'
 
 beforeEach(() => {
   localStorage.clear()
@@ -67,6 +67,26 @@ describe('addCard', () => {
     useBoardStore.getState().addCard('todo', 'Write report', '', tags)
     expect(useBoardStore.getState().cards[0].tags).toEqual(tags)
   })
+
+  it('keeps only the latest tag for a non-default group', () => {
+    const tags = [
+      { id: 'p1', title: 'Low' as const, group: 'priority' as const },
+      { id: 'p2', title: 'Critical' as const, group: 'priority' as const },
+    ]
+    useBoardStore.getState().addCard('todo', 'Write report', '', tags)
+    expect(useBoardStore.getState().cards[0].tags).toEqual([
+      { id: 'p2', title: 'Critical', group: 'priority' },
+    ])
+  })
+
+  it('allows multiple default-group tags to coexist', () => {
+    const tags = [
+      { id: 't1', title: 'Bug' as const, group: 'default' as const },
+      { id: 't2', title: 'Feature' as const, group: 'default' as const },
+    ]
+    useBoardStore.getState().addCard('todo', 'Write report', '', tags)
+    expect(useBoardStore.getState().cards[0].tags).toEqual(tags)
+  })
 })
 
 describe('updateCard', () => {
@@ -130,6 +150,19 @@ describe('updateCard', () => {
     const [card] = useBoardStore.getState().cards
     useBoardStore.getState().updateCard(card.id, '   ', 'desc', [])
     expect(useBoardStore.getState().cards[0].tags).toEqual([{ id: 't1', title: 'Bug' }])
+  })
+
+  it('keeps only the latest tag for a non-default group on update', () => {
+    useBoardStore.getState().addCard('todo', 'First')
+    const [card] = useBoardStore.getState().cards
+    const tags = [
+      { id: 'p1', title: 'Medium' as const, group: 'priority' as const },
+      { id: 'p2', title: 'High' as const, group: 'priority' as const },
+    ]
+    useBoardStore.getState().updateCard(card.id, card.title, card.description, tags)
+    expect(useBoardStore.getState().cards[0].tags).toEqual([
+      { id: 'p2', title: 'High', group: 'priority' },
+    ])
   })
 })
 
@@ -201,6 +234,30 @@ describe('persistence', () => {
     const parsed = JSON.parse(raw as string)
     expect(parsed.state.cards).toHaveLength(1)
     expect(parsed.state.cards[0].title).toBe('Persisted task')
+  })
+})
+
+describe('dedupeTagsByGroup', () => {
+  it('replaces an earlier tag in the same non-default group in place, preserving position', () => {
+    const tags = [
+      { id: 't1', title: 'Bug' as const, group: 'default' as const },
+      { id: 'p1', title: 'Low' as const, group: 'priority' as const },
+      { id: 't2', title: 'Feature' as const, group: 'default' as const },
+      { id: 'p2', title: 'Critical' as const, group: 'priority' as const },
+    ]
+    expect(dedupeTagsByGroup(tags)).toEqual([
+      { id: 't1', title: 'Bug', group: 'default' },
+      { id: 'p2', title: 'Critical', group: 'priority' },
+      { id: 't2', title: 'Feature', group: 'default' },
+    ])
+  })
+
+  it('leaves tags with no group or the default group untouched', () => {
+    const tags = [
+      { id: 't1', title: 'Bug' as const },
+      { id: 't2', title: 'Feature' as const, group: 'default' as const },
+    ]
+    expect(dedupeTagsByGroup(tags)).toEqual(tags)
   })
 })
 
