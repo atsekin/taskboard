@@ -1,23 +1,28 @@
-import { useEffect, type ReactNode } from 'react'
+import { useEffect, type MouseEvent, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 
-interface ModalProps {
-  isOpen: boolean
+export type ModalProps = {
+  open: boolean
   onClose: () => void
   children: ReactNode
+  className?: string
 }
 
-function Modal({ isOpen, onClose, children }: ModalProps) {
+export function Modal({ open, onClose, children, className = '' }: ModalProps) {
   useEffect(() => {
-    if (!isOpen) return
+    if (!open) return
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') onClose()
     }
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [isOpen, onClose])
+  }, [open, onClose])
 
-  if (!isOpen) return null
+  if (!open) return null
+
+  const handleDialogClick = (event: MouseEvent) => {
+    event.stopPropagation()
+  }
 
   return createPortal(
     <div
@@ -27,8 +32,8 @@ function Modal({ isOpen, onClose, children }: ModalProps) {
       <div
         role="dialog"
         aria-modal="true"
-        className="w-full max-w-sm rounded-lg bg-white p-4 shadow-lg"
-        onClick={(event) => event.stopPropagation()}
+        className={`w-full max-w-sm rounded-lg bg-white p-4 shadow-lg ${className}`.trim()}
+        onClick={handleDialogClick}
       >
         {children}
       </div>
@@ -36,5 +41,3 @@ function Modal({ isOpen, onClose, children }: ModalProps) {
     document.body,
   )
 }
-
-export default Modal

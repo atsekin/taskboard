@@ -1,25 +1,27 @@
-import { useState } from 'react'
+import { useState, type ChangeEvent, type FormEvent } from 'react'
 import type { Tag } from '../../store/boardStore'
-import { TagPicker } from '../TagPicker/TagPicker'
+import { TagPicker } from '../TagPicker'
 
-interface CardFormProps {
+export type CardFormProps = {
   initialTitle?: string
   initialDescription?: string
   initialTags?: Tag[]
   submitLabel: string
   onSubmit: (title: string, description: string, tags: Tag[]) => void
   onCancel: () => void
+  className?: string
 }
 
 const MAX_TITLE_LENGTH = 100
 
-function CardForm({
+export function CardForm({
   initialTitle = '',
   initialDescription = '',
   initialTags = [],
   submitLabel,
   onSubmit,
   onCancel,
+  className = '',
 }: CardFormProps) {
   const [title, setTitle] = useState(initialTitle)
   const [description, setDescription] = useState(initialDescription)
@@ -28,17 +30,24 @@ function CardForm({
   const trimmedTitle = title.trim()
   const isValid = trimmedTitle.length > 0 && trimmedTitle.length <= MAX_TITLE_LENGTH
 
+  const handleTitleChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setTitle(event.target.value)
+  }
+
+  const handleDescriptionChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
+    setDescription(event.target.value)
+  }
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    if (isValid) onSubmit(title, description, tags)
+  }
+
   return (
-    <form
-      className="flex flex-col gap-2"
-      onSubmit={(event) => {
-        event.preventDefault()
-        if (isValid) onSubmit(title, description, tags)
-      }}
-    >
+    <form className={`flex flex-col gap-2 ${className}`.trim()} onSubmit={handleSubmit}>
       <input
         value={title}
-        onChange={(event) => setTitle(event.target.value)}
+        onChange={handleTitleChange}
         maxLength={MAX_TITLE_LENGTH}
         placeholder="Title"
         autoFocus
@@ -49,7 +58,7 @@ function CardForm({
       </p>
       <textarea
         value={description}
-        onChange={(event) => setDescription(event.target.value)}
+        onChange={handleDescriptionChange}
         placeholder="Description (optional)"
         rows={3}
         className="rounded border border-slate-300 px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400"
@@ -74,5 +83,3 @@ function CardForm({
     </form>
   )
 }
-
-export default CardForm
