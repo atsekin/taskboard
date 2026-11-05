@@ -23,4 +23,4 @@ description: Plan and implement a new user-facing feature for TaskBoard end-to-e
 
 ## 5. Verify
 - Run `npm run lint && npm run typecheck && npm run test -- --run`; all must pass before calling the feature done.
-- Don't start a new dev server — one is already running at :5173 per `CLAUDE.md`. Use the Chrome extension to exercise the feature end-to-end: confirm a pre-existing localStorage record (one predating this change) still loads without a blank-screen crash, and confirm the new data survives a page reload.
+- Use the Chrome extension to exercise the feature end-to-end: confirm a pre-existing localStorage record (one predating this change) still loads without a blank-screen crash, and confirm the new data survives a page reload.
