@@ -18,5 +18,14 @@ export default defineConfig([
     languageOptions: {
       globals: globals.browser,
     },
+    rules: {
+      quotes: ['error', 'single', { avoidEscape: true }],
+      semi: ['error', 'never'],
+      'comma-dangle': ['error', 'always-multiline'],
+      'eol-last': ['error', 'always'],
+      'no-trailing-spaces': 'error',
+      'no-multiple-empty-lines': ['error', { max: 1 }],
+      indent: ['error', 2, { SwitchCase: 1 }],
+    },
   },
 ])
