@@ -30,13 +30,15 @@ export function CardItem({ card, className = '' }: CardItemProps) {
   }
 
   return (
-    <div className={`rounded border border-slate-200 bg-white p-2 shadow-sm ${className}`.trim()}>
-      <p className="font-medium text-slate-800">{card.title}</p>
+    <div
+      className={`flex flex-col gap-2 rounded-card border border-card-border bg-card-bg p-2 font-card ${className}`.trim()}
+    >
+      <p className="text-card-title font-medium text-card-text">{card.title}</p>
       {card.description && (
-        <p className="mt-1 text-sm text-slate-500">{card.description}</p>
+        <p className="text-card-title text-card-description">{card.description}</p>
       )}
-      <TagList tags={card.tags} className="mt-2" />
-      <div className="mt-2 flex items-center gap-1">
+      <TagList tags={card.tags} />
+      <div className="flex items-center gap-1">
         <button
           type="button"
           disabled={isFirst}

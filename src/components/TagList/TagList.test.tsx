@@ -21,16 +21,31 @@ describe('TagList', () => {
     expect(container).toBeEmptyDOMElement()
   })
 
-  it('renders a regular tag with the neutral slate style', () => {
+  it('renders a regular tag with the default tag style', () => {
     render(<TagList tags={[{ id: '1', title: 'Bug', group: 'default' }]} />)
-    expect(screen.getByText('Bug')).toHaveClass('bg-slate-100', 'text-slate-600')
+    expect(screen.getByText('Bug')).toHaveClass('bg-tag-bg', 'text-tag-text')
+  })
+
+  it('renders Frontend and Design tags with the accent color', () => {
+    render(
+      <TagList
+        tags={[
+          { id: '1', title: 'Frontend', group: 'default' },
+          { id: '2', title: 'Design', group: 'default' },
+        ]}
+      />,
+    )
+    expect(screen.getByText('Design')).toHaveClass('bg-tag-accent-bg')
+    const item = screen.getByText('Frontend')
+    expect(item).toHaveClass('bg-tag-accent-bg')
+    expect(item).not.toHaveClass('bg-tag-bg')
   })
 
   it('renders a priority tag with a distinct color instead of the neutral style', () => {
     render(<TagList tags={[{ id: '1', title: 'Critical', group: 'priority' }]} />)
     const item = screen.getByText('Critical')
-    expect(item).toHaveClass('bg-red-100', 'text-red-700')
-    expect(item).not.toHaveClass('bg-slate-100')
+    expect(item).toHaveClass('bg-priority-critical-bg', 'text-priority-text-light')
+    expect(item).not.toHaveClass('bg-tag-bg')
   })
 
   it('gives each priority level its own color', () => {
@@ -42,7 +57,7 @@ describe('TagList', () => {
         ]}
       />,
     )
-    expect(screen.getByText('High')).toHaveClass('bg-orange-100', 'text-orange-700')
-    expect(screen.getByText('Low')).toHaveClass('bg-blue-100', 'text-blue-700')
+    expect(screen.getByText('High')).toHaveClass('bg-priority-high-bg', 'text-priority-text-light')
+    expect(screen.getByText('Low')).toHaveClass('bg-priority-low-bg', 'text-priority-text-dark')
   })
 })
