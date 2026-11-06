@@ -6,29 +6,30 @@ export type TagListProps = {
 }
 
 const PRIORITY_COLORS: Record<PriorityTitle, string> = {
-  Critical: 'bg-red-100 text-red-700',
-  High: 'bg-orange-100 text-orange-700',
-  Medium: 'bg-amber-100 text-amber-700',
-  Low: 'bg-blue-100 text-blue-700',
+  Critical: 'bg-priority-critical-bg text-priority-text-light',
+  High: 'bg-priority-high-bg text-priority-text-light',
+  Medium: 'bg-priority-medium-bg text-priority-text-dark',
+  Low: 'bg-priority-low-bg text-priority-text-dark',
 }
+
+// Figma's pink "Mobile" tag colour, applied to the closest app tags.
+const ACCENT_TAG_TITLES: ReadonlySet<Tag['title']> = new Set(['Frontend', 'Design'])
 
 function tagClassName(tag: Tag): string {
   if (tag.group === PRIORITY_GROUP) {
-    return PRIORITY_COLORS[tag.title as PriorityTitle]
+    return `rounded-priority px-2 py-1 ${PRIORITY_COLORS[tag.title as PriorityTitle]}`
   }
-  return 'bg-slate-100 text-slate-600'
+  const background = ACCENT_TAG_TITLES.has(tag.title) ? 'bg-tag-accent-bg' : 'bg-tag-bg'
+  return `rounded-tag p-1 text-tag-text ${background}`
 }
 
 export function TagList({ tags, className = '' }: TagListProps) {
   if (tags.length === 0) return null
 
   return (
-    <ul className={`flex flex-wrap gap-1 ${className}`.trim()} aria-label="Tags">
+    <ul className={`flex flex-wrap items-center gap-2 ${className}`.trim()} aria-label="Tags">
       {tags.map((tag) => (
-        <li
-          key={tag.id}
-          className={`rounded-full px-2 py-0.5 text-xs font-medium ${tagClassName(tag)}`}
-        >
+        <li key={tag.id} className={`text-tag font-normal ${tagClassName(tag)}`}>
           {tag.title}
         </li>
       ))}

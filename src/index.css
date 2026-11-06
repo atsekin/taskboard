@@ -1,1 +1,32 @@
 @import 'tailwindcss';
+
+@theme {
+  /* Typography (docs/design.md) */
+  --font-card: 'Poppins', ui-sans-serif, system-ui, sans-serif;
+  --text-card-title: 12px;
+  --text-card-title--line-height: normal;
+  --text-tag: 10px;
+  --text-tag--line-height: normal;
+
+  /* Card */
+  --color-card-bg: #ffffff;
+  --color-card-border: #666666;
+  --color-card-text: #221c1d;
+  --color-card-description: #666666;
+  --radius-card: 4px;
+
+  /* Tags */
+  --color-tag-bg: #4f1dde;
+  --color-tag-accent-bg: #de1d6e;
+  --color-tag-text: rgba(255, 255, 255, 0.9);
+  --radius-tag: 4px;
+
+  /* Priority tags */
+  --color-priority-critical-bg: #9b1230;
+  --color-priority-high-bg: #de1d3e;
+  --color-priority-medium-bg: #f0ca81;
+  --color-priority-low-bg: #b8ebb0;
+  --color-priority-text-light: #ffffff;
+  --color-priority-text-dark: #221c1d;
+  --radius-priority: 20px;
+}
