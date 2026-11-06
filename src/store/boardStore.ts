@@ -100,11 +100,11 @@ export const useBoardStore = create<BoardState>()(
           cards: get().cards.map((card) =>
             card.id === id
               ? {
-                  ...card,
-                  title: trimmedTitle,
-                  description: description.trim(),
-                  tags: dedupeTagsByGroup(tags),
-                }
+                ...card,
+                title: trimmedTitle,
+                description: description.trim(),
+                tags: dedupeTagsByGroup(tags),
+              }
               : card,
           ),
         })
